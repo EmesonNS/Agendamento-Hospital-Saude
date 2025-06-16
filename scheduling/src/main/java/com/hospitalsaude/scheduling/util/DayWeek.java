@@ -33,8 +33,4 @@ public enum DayWeek {
         throw new IllegalArgumentException("Dia da semana inválido: " + value);
     }
 
-//    @JsonValue
-//    public String getValue() {
-//        return value;
-//    }
 }
