@@ -1,5 +1,7 @@
 package com.hospitalsaude.scheduling.model;
 
+import com.hospitalsaude.scheduling.util.Specialty;
+import com.hospitalsaude.scheduling.util.SpecialtyConverter;
 import jakarta.persistence.*;
 
 @Entity
@@ -9,8 +11,9 @@ public class Doctor extends User {
     @Column(name = "crm", nullable = false, unique = true)
     private int crm;
 
+    @Convert(converter = SpecialtyConverter.class)
     @Column(name = "especialidade", nullable = false)
-    private String specialty;
+    private Specialty specialty;
 
     @Column(name = "foto_medico")
     private String photoLink;
@@ -23,11 +26,11 @@ public class Doctor extends User {
         this.crm = crm;
     }
 
-    public String getSpecialty() {
+    public Specialty getSpecialty() {
         return specialty;
     }
 
-    public void setSpecialty(String specialty) {
+    public void setSpecialty(Specialty specialty) {
         this.specialty = specialty;
     }
 

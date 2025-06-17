@@ -1,7 +1,7 @@
 package com.hospitalsaude.scheduling.controller;
 
-import com.hospitalsaude.scheduling.model.Doctor;
-import com.hospitalsaude.scheduling.service.interfaces.IDoctorService;
+import com.hospitalsaude.scheduling.model.Patient;
+import com.hospitalsaude.scheduling.service.interfaces.IPatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,20 +9,20 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 
 @RestController
-@RequestMapping("/doctor")
-public class DoctorController {
+@RequestMapping("/patient")
+public class PatientController {
 
     @Autowired
-    private IDoctorService service;
+    private IPatientService service;
 
     @GetMapping
-    public ResponseEntity<ArrayList<Doctor>> findAll(){
-        return ResponseEntity.ok(service.findAllDoctor());
+    public ResponseEntity<ArrayList<Patient>> findAll(){
+        return ResponseEntity.ok(service.findAllPatient());
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Doctor> findByCrm(@RequestParam(name = "crm") int crm){
-        Doctor result = service.findByCrm(crm);
+    public ResponseEntity<Patient> findByCpf(@RequestParam(name = "cpf") String cpf){
+        Patient result = service.findByCpf(cpf);
         if (result != null){
             return ResponseEntity.ok(result);
         }
@@ -30,17 +30,16 @@ public class DoctorController {
     }
 
     @PostMapping
-    public ResponseEntity<Doctor> addNew(@RequestBody Doctor doctor){
-        Doctor result = service.addNewDoctor(doctor);
+    public ResponseEntity<Patient> addNew(@RequestBody Patient patient){
+        Patient result = service.addNewPatient(patient);
         if (result != null){
             return ResponseEntity.status(201).body(result);
         }
         return ResponseEntity.badRequest().build();
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Doctor> alterDoctor(@PathVariable int id ,@RequestBody Doctor doctor){
-        Doctor result = service.modifyDoctor(doctor);
+    public ResponseEntity<Patient> alterPatient(int id, Patient patient){
+        Patient result = service.modifyPatient(patient);
         if (result != null){
             return ResponseEntity.ok(result);
         }

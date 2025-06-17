@@ -1,7 +1,8 @@
-package com.hospitalsaude.scheduling.service;
+package com.hospitalsaude.scheduling.service.implement;
 
 import com.hospitalsaude.scheduling.model.ScheduleDoctor;
 import com.hospitalsaude.scheduling.repository.ScheduleDoctorRepository;
+import com.hospitalsaude.scheduling.service.interfaces.IScheduleDoctorService;
 import com.hospitalsaude.scheduling.util.DayWeek;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,12 +38,12 @@ public class ScheduleDoctorServiceImpl implements IScheduleDoctorService {
     }
 
     @Override
-    public ArrayList<ScheduleDoctor> recoverAllSchedule() {
+    public ArrayList<ScheduleDoctor> findAllSchedule() {
         return (ArrayList<ScheduleDoctor>) repository.findAll();
     }
 
     @Override
-    public ArrayList<ScheduleDoctor> recoverByDayWeek(DayWeek dayWeek) {
+    public ArrayList<ScheduleDoctor> findByDayWeek(DayWeek dayWeek) {
         return repository.findByDayWeek(dayWeek);
     }
 }

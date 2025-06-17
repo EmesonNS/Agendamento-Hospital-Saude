@@ -1,31 +1,54 @@
 package com.hospitalsaude.scheduling.model;
 
-import com.hospitalsaude.scheduling.util.Gender;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "tbl_paciente")
-public class Patient {
+public class Patient extends User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private int id;
-
-    @Column(name = "nome_paciente", length = 100, nullable = false)
-    private String name;
-
-    @Column(name = "email_paciente", length = 100)
-    private String email;
-
-    @Column(name = "cpf", length = 20)
-    private String cpf;
+    @Column(name = "data_nascimento")
     private LocalDate dateBirth;
-    private Gender gender;
-    private String phone;
+
+    @Column(name = "genero", length = 50)
+    private String gender;
+
+    @Column(name = "tipo_sanguineo", length = 10)
     private String bloodType;
+
+    @Column(name = "observacao", length = 500)
     private String note;
 
+    public LocalDate getDateBirth() {
+        return dateBirth;
+    }
+
+    public void setDateBirth(LocalDate dateBirth) {
+        this.dateBirth = dateBirth;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getBloodType() {
+        return bloodType;
+    }
+
+    public void setBloodType(String bloodType) {
+        this.bloodType = bloodType;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
 }
