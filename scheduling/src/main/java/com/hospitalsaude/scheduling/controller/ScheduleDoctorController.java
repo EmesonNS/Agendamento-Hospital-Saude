@@ -1,7 +1,7 @@
 package com.hospitalsaude.scheduling.controller;
 
 import com.hospitalsaude.scheduling.model.ScheduleDoctor;
-import com.hospitalsaude.scheduling.service.IScheduleDoctorService;
+import com.hospitalsaude.scheduling.service.interfaces.IScheduleDoctorService;
 import com.hospitalsaude.scheduling.util.DayWeek;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +17,13 @@ public class ScheduleDoctorController {
     private IScheduleDoctorService service;
 
     @GetMapping
-    public ResponseEntity<ArrayList<ScheduleDoctor>> recoverAll(){
-        return ResponseEntity.ok(service.recoverAllSchedule());
+    public ResponseEntity<ArrayList<ScheduleDoctor>> findAll(){
+        return ResponseEntity.ok(service.findAllSchedule());
     }
 
     @GetMapping("/search")
-    public ResponseEntity<ArrayList<ScheduleDoctor>> recoverByDayWeek(@RequestParam(name = "dayWeek") DayWeek dayWeek){
-        ArrayList<ScheduleDoctor> result = service.recoverByDayWeek(dayWeek);
+    public ResponseEntity<ArrayList<ScheduleDoctor>> findByDayWeek(@RequestParam(name = "dayWeek") DayWeek dayWeek){
+        ArrayList<ScheduleDoctor> result = service.findByDayWeek(dayWeek);
         if (result != null){
             return ResponseEntity.ok(result);
         }

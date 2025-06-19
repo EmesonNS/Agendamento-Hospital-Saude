@@ -1,4 +1,4 @@
-package com.hospitalsaude.scheduling.service;
+package com.hospitalsaude.scheduling.service.interfaces;
 
 import com.hospitalsaude.scheduling.model.Doctor;
 
@@ -8,6 +8,6 @@ public interface IDoctorService {
 
     public Doctor addNewDoctor(Doctor doctor);
     public Doctor modifyDoctor(Doctor doctor);
-    public ArrayList<Doctor> recoverAllDoctor();
-    public Doctor recoverByCrm(int crm);
+    public ArrayList<Doctor> findAllDoctor();
+    public Doctor findByCrm(int crm);
 }

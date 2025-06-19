@@ -1,7 +1,7 @@
 package com.hospitalsaude.scheduling.util;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+
 
 public enum DayWeek {
     SEGUNDA("Segunda"),
@@ -33,8 +33,4 @@ public enum DayWeek {
         throw new IllegalArgumentException("Dia da semana inválido: " + value);
     }
 
-//    @JsonValue
-//    public String getValue() {
-//        return value;
-//    }
 }
