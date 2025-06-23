@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 public enum StatusAppointment {
     AGENDADA("Agendada"),
     CANCELADA("Cancelada"),
-    REALIZADA("Realizada");
+    REALIZADA("Realizada"),
+    NAOREALIZADA("Não Realizada");
 
     private final String value;
 

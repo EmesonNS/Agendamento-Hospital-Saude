@@ -7,6 +7,7 @@ import com.hospitalsaude.scheduling.util.TypeAppointmentConverter;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
@@ -26,6 +27,9 @@ public class Appointment {
     @JoinColumn(name = "id_paciente")
     private Patient patient;
 
+    @Column(name = "data_agendamento", nullable = false)
+    private LocalDateTime dateAppointment;
+
     @Column(name = "data_consulta", nullable = false)
     private LocalDate date;
 
@@ -39,6 +43,9 @@ public class Appointment {
     @Convert(converter = TypeAppointmentConverter.class)
     @Column(name = "tipo_consulta", nullable = false)
     private TypeAppointment type;
+
+    @Column(name = "observacao")
+    private String note;
 
     public int getId() {
         return id;
@@ -94,5 +101,21 @@ public class Appointment {
 
     public void setType(TypeAppointment type) {
         this.type = type;
+    }
+
+    public LocalDateTime getDateAppointment() {
+        return dateAppointment;
+    }
+
+    public void setDateAppointment(LocalDateTime dateAppointment) {
+        this.dateAppointment = dateAppointment;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 }
