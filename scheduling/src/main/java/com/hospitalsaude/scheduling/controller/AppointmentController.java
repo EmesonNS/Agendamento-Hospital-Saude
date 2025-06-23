@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/appointment")
@@ -22,6 +25,7 @@ public class AppointmentController {
 
     @PostMapping
     public ResponseEntity<Appointment> addNew(@RequestBody Appointment appointment){
+        appointment.setDateAppointment(LocalDateTime.now());
         Appointment result = service.addNewAppointment(appointment);
         if (result != null){
             return ResponseEntity.status(201).body(result);
