@@ -1,11 +1,11 @@
 package com.hospitalsaude.scheduling.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hospitalsaude.scheduling.util.DayWeek;
 import com.hospitalsaude.scheduling.util.DayWeekConverter;
 import jakarta.persistence.*;
 
 import java.time.LocalTime;
+import java.util.List;
 
 @Entity
 @Table(name = "tbl_agenda")
@@ -20,9 +20,15 @@ public class ScheduleDoctor {
     @JoinColumn(name = "id_medico")
     private Doctor doctor;
 
-    @Convert(converter = DayWeekConverter.class)
+    //@Convert(converter = DayWeekConverter.class)
+    @ElementCollection(targetClass = DayWeek.class)
+    @CollectionTable(
+            name = "agenda_dias",
+            joinColumns = @JoinColumn(name = "id_agenda")
+    )
+    @Enumerated(EnumType.STRING)
     @Column(name = "dia_da_semana", nullable = false)
-    private DayWeek dayWeek;
+    private List<DayWeek> dayWeek;
 
     @Column(name = "horario_inicio", nullable = false)
     private LocalTime startTime;
@@ -53,11 +59,11 @@ public class ScheduleDoctor {
         this.startTime = startTime;
     }
 
-    public DayWeek getDayWeek() {
+    public List<DayWeek> getDayWeek() {
         return dayWeek;
     }
 
-    public void setDayWeek(DayWeek dayWeek) {
+    public void setDayWeek(List<DayWeek> dayWeek) {
         this.dayWeek = dayWeek;
     }
 
