@@ -17,6 +17,16 @@ public class ScheduleDoctorController {
     @Autowired
     private IScheduleDoctorService service;
 
+    @PostMapping
+    public ResponseEntity<ScheduleDoctor> addNew(@RequestBody ScheduleDoctor scheduleDoctor){
+        ScheduleDoctor result = service.addNewSchedule(scheduleDoctor);
+        if(result != null){
+            return ResponseEntity.status(201).body(result);
+        }
+        System.out.println("doutor: " + scheduleDoctor.getDoctor() + "\nDia da Semana: " + scheduleDoctor.getDayWeek() + "\nInicio: " + scheduleDoctor.getStartTime() + "\nFim: " + scheduleDoctor.getEndTime());
+        return ResponseEntity.badRequest().build();
+    }
+
     @GetMapping
     public ResponseEntity<List<ScheduleDoctor>> findAll(){
         return ResponseEntity.ok(service.findAllSchedule());
@@ -32,22 +42,12 @@ public class ScheduleDoctorController {
     }
 
     @GetMapping(value = "/search", params = "doctor")
-    public ResponseEntity<List<ScheduleDoctor>> findByDoctor(@RequestParam Doctor doctor){
+    public ResponseEntity<List<ScheduleDoctor>> findByDoctor(@RequestParam(name = "doctor") Doctor doctor){
         List<ScheduleDoctor> result = service.findByDoctor(doctor);
         if (result != null){
             return ResponseEntity.ok(result);
         }
         return ResponseEntity.notFound().build();
-    }
-
-    @PostMapping
-    public ResponseEntity<ScheduleDoctor> addNew(@RequestBody ScheduleDoctor scheduleDoctor){
-        ScheduleDoctor result = service.addNewSchedule(scheduleDoctor);
-        if(result != null){
-            return ResponseEntity.status(201).body(result);
-        }
-        System.out.println("doutor: " + scheduleDoctor.getDoctor() + "\nDia da Semana: " + scheduleDoctor.getDayWeek() + "\nInicio: " + scheduleDoctor.getStartTime() + "\nFim: " + scheduleDoctor.getEndTime());
-        return ResponseEntity.badRequest().build();
     }
 
     @PutMapping("{id}")

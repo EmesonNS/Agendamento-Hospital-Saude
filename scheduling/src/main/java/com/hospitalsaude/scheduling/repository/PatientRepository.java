@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PatientRepository extends JpaRepository<Patient, Integer> {
     public Patient findByCpf(String cpf);
+    public Patient findByEmail(String email);
 }

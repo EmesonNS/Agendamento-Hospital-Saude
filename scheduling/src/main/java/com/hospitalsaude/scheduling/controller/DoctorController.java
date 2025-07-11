@@ -16,13 +16,22 @@ public class DoctorController {
     @Autowired
     private IDoctorService service;
 
+    @PostMapping
+    public ResponseEntity<Doctor> addNew(@RequestBody Doctor doctor){
+        Doctor result = service.addNewDoctor(doctor);
+        if (result != null){
+            return ResponseEntity.status(201).body(result);
+        }
+        return ResponseEntity.badRequest().build();
+    }
+
     @GetMapping
     public ResponseEntity<ArrayList<Doctor>> findAll(){
         return ResponseEntity.ok(service.findAllDoctor());
     }
 
     @GetMapping(value = "/search", params = "id")
-    public ResponseEntity<Doctor> findById(@RequestParam int id){
+    public ResponseEntity<Doctor> findById(@RequestParam(name = "id") int id){
         Doctor result = service.findById(id);
         if (result != null){
             return ResponseEntity.ok(result);
@@ -31,7 +40,7 @@ public class DoctorController {
     }
 
     @GetMapping(value = "/search", params = "crm")
-    public ResponseEntity<Doctor> findByCrm(@RequestParam int crm){
+    public ResponseEntity<Doctor> findByCrm(@RequestParam(name = "crm") int crm){
         Doctor result = service.findByCrm(crm);
         if (result != null){
             return ResponseEntity.ok(result);
@@ -40,7 +49,7 @@ public class DoctorController {
     }
 
     @GetMapping(value = "/search", params = "specialty")
-    public ResponseEntity<?> findBySpecialty(@RequestParam String specialty){
+    public ResponseEntity<?> findBySpecialty(@RequestParam(name = "specialty") String specialty){
         try {
             Specialty enumValue = Specialty.valueOf(specialty.toUpperCase());
             ArrayList<Doctor> result = service.findBySpecialty(enumValue);
@@ -52,15 +61,6 @@ public class DoctorController {
             return ResponseEntity.badRequest().body("Especialidade inválida: " + specialty);
         }
 
-    }
-
-    @PostMapping
-    public ResponseEntity<Doctor> addNew(@RequestBody Doctor doctor){
-        Doctor result = service.addNewDoctor(doctor);
-        if (result != null){
-            return ResponseEntity.status(201).body(result);
-        }
-        return ResponseEntity.badRequest().build();
     }
 
     @PutMapping("/{id}")

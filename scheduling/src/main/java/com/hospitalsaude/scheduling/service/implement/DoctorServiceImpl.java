@@ -80,7 +80,7 @@ public class DoctorServiceImpl implements IDoctorService {
             LocalTime endTime = scheduleDoctor.getEndTime();
 
             for (DayWeek day : dayWeekList) {
-                result += "\"" + day.name() + "\":{[";
+                result += "\"" +     day.name() + "\":{[";
                 LocalTime availableTime = startTime;
                 while (availableTime.isBefore(endTime)) {
                     result += "\"" + availableTime + "\",";
