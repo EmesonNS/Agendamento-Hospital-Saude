@@ -42,7 +42,22 @@ public class PatientServiceImpl implements IPatientService {
     }
 
     @Override
+    public Patient findById(int id) {
+        return repository.findById(id).orElse(null);
+    }
+
+    @Override
     public Patient findByCpf(String cpf) {
         return repository.findByCpf(cpf);
+    }
+
+    @Override
+    public Patient findByEmail(String email) {
+        return repository.findByEmail(email);
+    }
+
+    @Override
+    public void deleteById(int id) {
+        repository.deleteById(id);
     }
 }

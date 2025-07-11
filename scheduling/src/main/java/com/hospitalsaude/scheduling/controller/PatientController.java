@@ -15,20 +15,6 @@ public class PatientController {
     @Autowired
     private IPatientService service;
 
-    @GetMapping
-    public ResponseEntity<ArrayList<Patient>> findAll(){
-        return ResponseEntity.ok(service.findAllPatient());
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<Patient> findByCpf(@RequestParam(name = "cpf") String cpf){
-        Patient result = service.findByCpf(cpf);
-        if (result != null){
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.notFound().build();
-    }
-
     @PostMapping
     public ResponseEntity<Patient> addNew(@RequestBody Patient patient){
         Patient result = service.addNewPatient(patient);
@@ -38,11 +24,54 @@ public class PatientController {
         return ResponseEntity.badRequest().build();
     }
 
-    public ResponseEntity<Patient> alterPatient(int id, Patient patient){
+    @GetMapping
+    public ResponseEntity<ArrayList<Patient>> findAll(){
+        return ResponseEntity.ok(service.findAllPatient());
+    }
+
+    @GetMapping(value = "/search", params = "id")
+    public ResponseEntity<Patient> findById(@RequestParam(name = "id") int id){
+        Patient result = service.findById(id);
+        if (result != null){
+            return ResponseEntity.ok(result);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping(value = "/search", params = "cpf")
+    public ResponseEntity<Patient> findByCpf(@RequestParam(name = "cpf") String cpf){
+        Patient result = service.findByCpf(cpf);
+        if (result != null){
+            return ResponseEntity.ok(result);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping(value = "/search", params = "email")
+    public ResponseEntity<Patient> findByEmail(@RequestParam(name = "email") String email){
+        Patient result = service.findByEmail(email);
+        if (result != null){
+            return ResponseEntity.ok(result);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Patient> alterPatient(@PathVariable int id,@RequestBody Patient patient){
+        patient.setId(id);
         Patient result = service.modifyPatient(patient);
         if (result != null){
             return ResponseEntity.ok(result);
         }
         return ResponseEntity.badRequest().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable int id){
+        if (service.findById(id) != null){
+            service.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }
