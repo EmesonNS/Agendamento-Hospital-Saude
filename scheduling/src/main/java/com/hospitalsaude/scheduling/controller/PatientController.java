@@ -18,10 +18,7 @@ public class PatientController {
     @PostMapping
     public ResponseEntity<Patient> addNew(@RequestBody Patient patient){
         Patient result = service.addNewPatient(patient);
-        if (result != null){
-            return ResponseEntity.status(201).body(result);
-        }
-        return ResponseEntity.badRequest().build();
+        return result != null ? ResponseEntity.status(201).body(result) : ResponseEntity.badRequest().build();
     }
 
     @GetMapping
@@ -32,38 +29,26 @@ public class PatientController {
     @GetMapping(value = "/search", params = "id")
     public ResponseEntity<Patient> findById(@RequestParam(name = "id") int id){
         Patient result = service.findById(id);
-        if (result != null){
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.notFound().build();
+        return result != null ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
     }
 
     @GetMapping(value = "/search", params = "cpf")
     public ResponseEntity<Patient> findByCpf(@RequestParam(name = "cpf") String cpf){
         Patient result = service.findByCpf(cpf);
-        if (result != null){
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.notFound().build();
+        return result != null ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
     }
 
     @GetMapping(value = "/search", params = "email")
     public ResponseEntity<Patient> findByEmail(@RequestParam(name = "email") String email){
         Patient result = service.findByEmail(email);
-        if (result != null){
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.notFound().build();
+        return result != null ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Patient> alterPatient(@PathVariable int id,@RequestBody Patient patient){
         patient.setId(id);
         Patient result = service.modifyPatient(patient);
-        if (result != null){
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.badRequest().build();
+        return result != null ? ResponseEntity.ok(result) : ResponseEntity.badRequest().build();
     }
 
     @DeleteMapping("/{id}")

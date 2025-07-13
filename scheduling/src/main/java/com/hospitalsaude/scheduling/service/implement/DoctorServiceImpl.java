@@ -1,7 +1,9 @@
 package com.hospitalsaude.scheduling.service.implement;
 
+import com.hospitalsaude.scheduling.model.Appointment;
 import com.hospitalsaude.scheduling.model.Doctor;
 import com.hospitalsaude.scheduling.model.ScheduleDoctor;
+import com.hospitalsaude.scheduling.repository.AppointmentRepository;
 import com.hospitalsaude.scheduling.repository.DoctorRepository;
 import com.hospitalsaude.scheduling.repository.ScheduleDoctorRepository;
 import com.hospitalsaude.scheduling.service.interfaces.IDoctorService;
@@ -10,9 +12,11 @@ import com.hospitalsaude.scheduling.util.Specialty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.text.Normalizer;
+import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.format.TextStyle;
+import java.util.*;
 
 @Component
 public class DoctorServiceImpl implements IDoctorService {
@@ -22,6 +26,9 @@ public class DoctorServiceImpl implements IDoctorService {
 
     @Autowired
     private ScheduleDoctorRepository scheduleDoctorRepository;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
 
     @Override
     public Doctor addNewDoctor(Doctor doctor) {
@@ -71,28 +78,50 @@ public class DoctorServiceImpl implements IDoctorService {
     }
 
     @Override
-    public String findAvailableTimes(Doctor doctor) {
+    public Map<DayWeek, List<String>> openingTimes(Doctor doctor) {
         List<ScheduleDoctor> scheduleDoctorList = scheduleDoctorRepository.findByDoctor(doctor);
-        String result = "{";
-        for (ScheduleDoctor scheduleDoctor : scheduleDoctorList) {
+        Map<DayWeek, List<String>> scheduleMap = new HashMap<>();
+
+        for (ScheduleDoctor scheduleDoctor : scheduleDoctorList){
             List<DayWeek> dayWeekList = scheduleDoctor.getDayWeek();
             LocalTime startTime = scheduleDoctor.getStartTime();
             LocalTime endTime = scheduleDoctor.getEndTime();
 
-            for (DayWeek day : dayWeekList) {
-                result += "\"" +     day.name() + "\":{[";
-                LocalTime availableTime = startTime;
-                while (availableTime.isBefore(endTime)) {
-                    result += "\"" + availableTime + "\",";
-                    availableTime = availableTime.plusMinutes(30);
+            for (DayWeek day : dayWeekList){
+                List<String> times = scheduleMap.getOrDefault(day, new ArrayList<>());
+                LocalTime current = startTime;
+                while (current.isBefore(endTime)) {
+                    times.add(current.toString());
+                    current = current.plusMinutes(30);
                 }
-                result += "\"" + availableTime + "\"]},";
+                scheduleMap.put(day, times);
             }
         }
-        result = result.substring(0, result.length()-1);
-        result += "}";
 
-        return result;
+        return scheduleMap;
+    }
+
+    @Override
+    public List<String> findAvailableTimesByDate(Doctor doctor, LocalDate date) {
+        String dayWeek = date.getDayOfWeek()
+                .getDisplayName(TextStyle.FULL, Locale.of("pt", "BR"));
+        String dayWeekNormalized = Normalizer.normalize(dayWeek, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .replace("-feira", "");
+        DayWeek dayWeekEnum = DayWeek.fromString(dayWeekNormalized);
+
+        List<String> appointmentsTimes = appointmentRepository.findByDoctorAndDate(doctor, date)
+                .stream()
+                .map(appointment -> appointment.getTime().toString())
+                .toList();
+
+        Map<DayWeek, List<String>> openingTimes = this.openingTimes(doctor);
+        if (openingTimes.containsKey(dayWeekEnum)){
+            List<String> times = openingTimes.get(dayWeekEnum);
+            times.removeAll(appointmentsTimes);
+            return times;
+        }
+        return List.of();
     }
 
     @Override
