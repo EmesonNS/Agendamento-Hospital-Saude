@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public enum DayWeek {
     SEGUNDA("Segunda"),
-    TERCA("Terça"),
+    TERCA("Terca"),
     QUARTA("Quarta"),
     QUINTA("Quinta"),
     SEXTA("Sexta"),

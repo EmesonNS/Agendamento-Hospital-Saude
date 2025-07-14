@@ -1,7 +1,6 @@
 package com.hospitalsaude.scheduling.model;
 
 import com.hospitalsaude.scheduling.util.DayWeek;
-import com.hospitalsaude.scheduling.util.DayWeekConverter;
 import jakarta.persistence.*;
 
 import java.time.LocalTime;

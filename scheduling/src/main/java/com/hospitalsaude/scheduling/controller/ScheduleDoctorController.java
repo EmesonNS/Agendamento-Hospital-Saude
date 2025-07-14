@@ -20,11 +20,7 @@ public class ScheduleDoctorController {
     @PostMapping
     public ResponseEntity<ScheduleDoctor> addNew(@RequestBody ScheduleDoctor scheduleDoctor){
         ScheduleDoctor result = service.addNewSchedule(scheduleDoctor);
-        if(result != null){
-            return ResponseEntity.status(201).body(result);
-        }
-        System.out.println("doutor: " + scheduleDoctor.getDoctor() + "\nDia da Semana: " + scheduleDoctor.getDayWeek() + "\nInicio: " + scheduleDoctor.getStartTime() + "\nFim: " + scheduleDoctor.getEndTime());
-        return ResponseEntity.badRequest().build();
+        return result != null ? ResponseEntity.status(201).body(result) : ResponseEntity.badRequest().build();
     }
 
     @GetMapping
@@ -35,29 +31,20 @@ public class ScheduleDoctorController {
     @GetMapping(value = "/search", params = "day-week")
     public ResponseEntity<List<ScheduleDoctor>> findByDayWeek(@RequestParam(name = "day-week") String dayWeek){
         List<ScheduleDoctor> result = service.findByDayWeek(DayWeek.valueOf(dayWeek));
-        if (result != null){
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.notFound().build();
+        return !result.isEmpty() ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
     }
 
     @GetMapping(value = "/search", params = "doctor")
     public ResponseEntity<List<ScheduleDoctor>> findByDoctor(@RequestParam(name = "doctor") Doctor doctor){
         List<ScheduleDoctor> result = service.findByDoctor(doctor);
-        if (result != null){
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.notFound().build();
+        return !result.isEmpty() ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
     }
 
     @PutMapping("{id}")
     public ResponseEntity<ScheduleDoctor> alterSchedule(@PathVariable int id, @RequestBody ScheduleDoctor scheduleDoctor){
         scheduleDoctor.setId(id);
         ScheduleDoctor result = service.modifySchedule(scheduleDoctor);
-        if (result != null){
-            return ResponseEntity.ok(result);
-        }
-        return ResponseEntity.badRequest().build();
+        return result != null ? ResponseEntity.ok(result) : ResponseEntity.badRequest().build();
     }
 
     @DeleteMapping("/{id}")
