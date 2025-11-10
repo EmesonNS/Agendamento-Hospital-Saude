@@ -1,53 +1,57 @@
 package com.hospitalsaude.scheduling.controller;
 
-import com.hospitalsaude.scheduling.model.Patient;
+import com.hospitalsaude.scheduling.dto.PatientRequestDTO;
+import com.hospitalsaude.scheduling.dto.PatientResponseDTO;
 import com.hospitalsaude.scheduling.service.interfaces.IPatientService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/patient")
 public class PatientController {
 
-    @Autowired
-    private IPatientService service;
+    private final IPatientService service;
+
+    public PatientController(IPatientService service) {
+        this.service = service;
+    }
 
     @PostMapping
-    public ResponseEntity<Patient> addNew(@RequestBody Patient patient){
-        Patient result = service.addNewPatient(patient);
+    public ResponseEntity<PatientResponseDTO> addNew(@RequestBody PatientRequestDTO patientDTO){
+        PatientResponseDTO result = service.addNewPatient(patientDTO);
         return result != null ? ResponseEntity.status(201).body(result) : ResponseEntity.badRequest().build();
     }
 
     @GetMapping
-    public ResponseEntity<ArrayList<Patient>> findAll(){
+    public ResponseEntity<List<PatientResponseDTO>> findAll(){
         return ResponseEntity.ok(service.findAllPatient());
     }
 
     @GetMapping(value = "/search", params = "id")
-    public ResponseEntity<Patient> findById(@RequestParam(name = "id") int id){
-        Patient result = service.findById(id);
+    public ResponseEntity<PatientResponseDTO> findById(@RequestParam(name = "id") int id){
+        PatientResponseDTO result = service.findById(id);
         return result != null ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
     }
 
     @GetMapping(value = "/search", params = "cpf")
-    public ResponseEntity<Patient> findByCpf(@RequestParam(name = "cpf") String cpf){
-        Patient result = service.findByCpf(cpf);
+    public ResponseEntity<PatientResponseDTO> findByCpf(@RequestParam(name = "cpf") String cpf){
+        PatientResponseDTO result = service.findByCpf(cpf);
         return result != null ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
     }
 
     @GetMapping(value = "/search", params = "email")
-    public ResponseEntity<Patient> findByEmail(@RequestParam(name = "email") String email){
-        Patient result = service.findByEmail(email);
+    public ResponseEntity<PatientResponseDTO> findByEmail(@RequestParam(name = "email") String email){
+        PatientResponseDTO result = service.findByEmail(email);
         return result != null ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Patient> alterPatient(@PathVariable int id,@RequestBody Patient patient){
-        patient.setId(id);
-        Patient result = service.modifyPatient(patient);
+    public ResponseEntity<PatientResponseDTO> alterPatient(
+            @PathVariable int id,
+            @RequestBody PatientRequestDTO patientDTO){
+        PatientResponseDTO result = service.modifyPatient(id, patientDTO);
         return result != null ? ResponseEntity.ok(result) : ResponseEntity.badRequest().build();
     }
 

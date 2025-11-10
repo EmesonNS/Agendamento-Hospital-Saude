@@ -15,9 +15,6 @@ public class Doctor extends User {
     @Column(name = "especialidade", nullable = false)
     private Specialty specialty;
 
-    @Column(name = "foto_medico")
-    private String photoLink;
-
     public int getCrm() {
         return crm;
     }
@@ -32,13 +29,5 @@ public class Doctor extends User {
 
     public void setSpecialty(Specialty specialty) {
         this.specialty = specialty;
-    }
-
-    public String getPhotoLink() {
-        return photoLink;
-    }
-
-    public void setPhotoLink(String photoLink) {
-        this.photoLink = photoLink;
     }
 }

@@ -1,6 +1,8 @@
 package com.hospitalsaude.scheduling.service.implement;
 
-import com.hospitalsaude.scheduling.model.Appointment;
+import com.hospitalsaude.scheduling.dto.DoctorRequestDTO;
+import com.hospitalsaude.scheduling.dto.DoctorResponseDTO;
+import com.hospitalsaude.scheduling.mapper.DoctorMapper;
 import com.hospitalsaude.scheduling.model.Doctor;
 import com.hospitalsaude.scheduling.model.ScheduleDoctor;
 import com.hospitalsaude.scheduling.repository.AppointmentRepository;
@@ -9,7 +11,8 @@ import com.hospitalsaude.scheduling.repository.ScheduleDoctorRepository;
 import com.hospitalsaude.scheduling.service.interfaces.IDoctorService;
 import com.hospitalsaude.scheduling.util.DayWeek;
 import com.hospitalsaude.scheduling.util.Specialty;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.text.Normalizer;
@@ -17,59 +20,88 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class DoctorServiceImpl implements IDoctorService {
 
-    @Autowired
-    private DoctorRepository repository;
+    private final DoctorRepository repository;
 
-    @Autowired
-    private ScheduleDoctorRepository scheduleDoctorRepository;
+    private final ScheduleDoctorRepository scheduleDoctorRepository;
 
-    @Autowired
-    private AppointmentRepository appointmentRepository;
+    private final AppointmentRepository appointmentRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(DoctorServiceImpl.class);
+
+    public DoctorServiceImpl(DoctorRepository repository, ScheduleDoctorRepository scheduleDoctorRepository, AppointmentRepository appointmentRepository) {
+        this.repository = repository;
+        this.scheduleDoctorRepository = scheduleDoctorRepository;
+        this.appointmentRepository = appointmentRepository;
+    }
 
     @Override
-    public Doctor addNewDoctor(Doctor doctor) {
+    public DoctorResponseDTO addNewDoctor(DoctorRequestDTO doctorDTO) {
         try {
-            repository.save(doctor);
-            return doctor;
+            Doctor doctorEntity = DoctorMapper.toEntity(doctorDTO);
+            Doctor savedEntity = repository.save(doctorEntity);
+            return DoctorMapper.toResponseDTO(savedEntity);
         } catch (IllegalArgumentException e) {
-            System.out.println("DEBUG: " + e.getMessage());
+            logger.error("Erro ao tentar salvar Doctor: ", e);
         }
         return null;
     }
 
     @Override
-    public Doctor modifyDoctor(Doctor doctor) {
+    public DoctorResponseDTO modifyDoctor(int id, DoctorRequestDTO doctorDTO) {
         try {
-            repository.save(doctor);
-            return doctor;
+            Doctor existingDoctor = repository.findById(id).orElse(null);
+            if (existingDoctor == null){
+                logger.warn("Médico com id " + id + " não encontrado para atualização.");
+                return null;
+            }
+
+            existingDoctor.setName(doctorDTO.name());
+            existingDoctor.setEmail(doctorDTO.email());
+            existingDoctor.setPassword(doctorDTO.password());
+            existingDoctor.setCpf(doctorDTO.cpf());
+            existingDoctor.setPhone(doctorDTO.phone());
+            existingDoctor.setCrm(doctorDTO.crm());
+            existingDoctor.setSpecialty(doctorDTO.specialty());
+
+            Doctor updateDoctor = repository.save(existingDoctor);
+            return DoctorMapper.toResponseDTO(updateDoctor);
         } catch (Exception e) {
-            System.out.println("DEBUG: " + e.getMessage());
+            logger.error("Erro ao tentar atualizar Doctor: ", e);
         }
         return null;
     }
 
     @Override
-    public ArrayList<Doctor> findAllDoctor() {
-        return (ArrayList<Doctor>) repository.findAll();
+    public List<DoctorResponseDTO> findAllDoctor() {
+        return repository.findAll()
+                .stream()
+                .map(DoctorMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Doctor findById(int id) {
-        return repository.findById(id).orElse(null);
+    public DoctorResponseDTO findById(int id) {
+        Doctor doctor = repository.findById(id).orElse(null);
+        return (doctor != null) ? DoctorMapper.toResponseDTO(doctor) : null;
     }
 
     @Override
-    public Doctor findByCrm(int crm) {
-        return repository.findByCrm(crm);
+    public DoctorResponseDTO findByCrm(int crm) {
+        Doctor doctor = repository.findByCrm(crm);
+        return (doctor != null) ? DoctorMapper.toResponseDTO(doctor) : null;
     }
 
     @Override
-    public ArrayList<Doctor> findBySpecialty(Specialty specialty) {
-        return repository.findBySpecialty(specialty);
+    public List<DoctorResponseDTO> findBySpecialty(Specialty specialty) {
+        return repository.findBySpecialty(specialty)
+                .stream()
+                .map(DoctorMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -78,7 +110,13 @@ public class DoctorServiceImpl implements IDoctorService {
     }
 
     @Override
-    public Map<DayWeek, List<String>> openingTimes(Doctor doctor) {
+    public Map<DayWeek, List<String>> openingTimes(int doctorId) {
+        Doctor doctor = repository.findById(doctorId).orElse(null);
+        if (doctor == null){
+            logger.warn("Médico com id " + doctorId + " não encontrado para buscar horários.");
+            return new HashMap<>();
+        }
+
         List<ScheduleDoctor> scheduleDoctorList = scheduleDoctorRepository.findByDoctor(doctor);
         Map<DayWeek, List<String>> scheduleMap = new HashMap<>();
 
@@ -102,7 +140,13 @@ public class DoctorServiceImpl implements IDoctorService {
     }
 
     @Override
-    public List<String> findAvailableTimesByDate(Doctor doctor, LocalDate date) {
+    public List<String> findAvailableTimesByDate(int doctorId, LocalDate date) {
+        Doctor doctor = repository.findById(doctorId).orElse(null);
+        if (doctor == null) {
+            logger.warn("Médico com id " + doctorId + " não encontrado para buscar horários disponíveis.");
+            return List.of();
+        }
+
         String dayWeek = date.getDayOfWeek()
                 .getDisplayName(TextStyle.FULL, Locale.of("pt", "BR"));
         String dayWeekNormalized = Normalizer.normalize(dayWeek, Normalizer.Form.NFD)
@@ -115,7 +159,7 @@ public class DoctorServiceImpl implements IDoctorService {
                 .map(appointment -> appointment.getTime().toString())
                 .toList();
 
-        Map<DayWeek, List<String>> openingTimes = this.openingTimes(doctor);
+        Map<DayWeek, List<String>> openingTimes = this.openingTimes(doctorId);
         if (openingTimes.containsKey(dayWeekEnum)){
             List<String> times = openingTimes.get(dayWeekEnum);
             times.removeAll(appointmentsTimes);

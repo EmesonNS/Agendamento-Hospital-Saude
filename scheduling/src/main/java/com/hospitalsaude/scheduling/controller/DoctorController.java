@@ -1,17 +1,14 @@
 package com.hospitalsaude.scheduling.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hospitalsaude.scheduling.model.Doctor;
+import com.hospitalsaude.scheduling.dto.DoctorRequestDTO;
+import com.hospitalsaude.scheduling.dto.DoctorResponseDTO;
 import com.hospitalsaude.scheduling.service.interfaces.IDoctorService;
 import com.hospitalsaude.scheduling.util.DayWeek;
 import com.hospitalsaude.scheduling.util.Specialty;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -19,29 +16,32 @@ import java.util.Map;
 @RequestMapping("/doctor")
 public class DoctorController {
 
-    @Autowired
-    private IDoctorService service;
+    private final IDoctorService service;
+
+    public DoctorController(IDoctorService service) {
+        this.service = service;
+    }
 
     @PostMapping
-    public ResponseEntity<Doctor> addNew(@RequestBody Doctor doctor){
-        Doctor result = service.addNewDoctor(doctor);
+    public ResponseEntity<DoctorResponseDTO> addNew(@RequestBody DoctorRequestDTO doctorDTO){
+        DoctorResponseDTO result = service.addNewDoctor(doctorDTO);
         return result != null ? ResponseEntity.status(201).body(result) : ResponseEntity.badRequest().build();
     }
 
     @GetMapping
-    public ResponseEntity<ArrayList<Doctor>> findAll(){
+    public ResponseEntity<List<DoctorResponseDTO>> findAll(){
         return ResponseEntity.ok(service.findAllDoctor());
     }
 
     @GetMapping(value = "/search", params = "id")
-    public ResponseEntity<Doctor> findById(@RequestParam(name = "id") int id){
-        Doctor result = service.findById(id);
+    public ResponseEntity<DoctorResponseDTO> findById(@RequestParam(name = "id") int id){
+        DoctorResponseDTO result = service.findById(id);
         return result != null ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
     }
 
     @GetMapping(value = "/search", params = "crm")
-    public ResponseEntity<Doctor> findByCrm(@RequestParam(name = "crm") int crm){
-        Doctor result = service.findByCrm(crm);
+    public ResponseEntity<DoctorResponseDTO> findByCrm(@RequestParam(name = "crm") int crm){
+        DoctorResponseDTO result = service.findByCrm(crm);
         return result != null ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
     }
 
@@ -49,7 +49,7 @@ public class DoctorController {
     public ResponseEntity<?> findBySpecialty(@RequestParam(name = "specialty") String specialty){
         try {
             Specialty enumValue = Specialty.valueOf(specialty.toUpperCase());
-            ArrayList<Doctor> result = service.findBySpecialty(enumValue);
+            List<DoctorResponseDTO> result = service.findBySpecialty(enumValue);
             return !result.isEmpty() ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
         }catch (IllegalArgumentException e){
             return ResponseEntity.badRequest().body("Especialidade inválida: " + specialty);
@@ -58,9 +58,10 @@ public class DoctorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Doctor> alterDoctor(@PathVariable int id ,@RequestBody Doctor doctor){
-        doctor.setId(id);
-        Doctor result = service.modifyDoctor(doctor);
+    public ResponseEntity<DoctorResponseDTO> alterDoctor(
+            @PathVariable int id,
+            @RequestBody DoctorRequestDTO doctorDTO){
+        DoctorResponseDTO result = service.modifyDoctor(id, doctorDTO);
         return result != null ? ResponseEntity.ok(result) : ResponseEntity.badRequest().build();
     }
 
@@ -74,28 +75,17 @@ public class DoctorController {
     }
 
     @GetMapping("/{id}/opening-times")
-    public ResponseEntity<String> findOpeningTimes(@PathVariable(name = "id") Doctor doctor){
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            Map<DayWeek, List<String>> result = service.openingTimes(doctor);
-            String resultJson = objectMapper.writeValueAsString(result);
-            return ResponseEntity.ok(resultJson);
-        }catch (JsonProcessingException e){
-            throw new RuntimeException("Erro ao converter para JSON", e);
-        }
+    public ResponseEntity<Map<DayWeek, List<String>>> findOpeningTimes(@PathVariable(name = "id") int doctorId){
+        Map<DayWeek, List<String>> result = service.openingTimes(doctorId);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}/available-times")
-    public ResponseEntity<String> findAvailableTimesByDate(@PathVariable(name = "id") Doctor doctor,
-                                                           @RequestParam(name = "date") LocalDate date){
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            List<String> result = service.findAvailableTimesByDate(doctor, date);
-            String resultJson = objectMapper.writeValueAsString(result);
-            return ResponseEntity.ok(resultJson);
-        }catch (JsonProcessingException e){
-            throw new RuntimeException("Erro ao converter para JSON", e);
-        }
+    public ResponseEntity<List<String>> findAvailableTimesByDate(
+            @PathVariable(name = "id") int doctorId,
+            @RequestParam(name = "date") LocalDate date){
+        List<String> result = service.findAvailableTimesByDate(doctorId, date);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/specialty")
