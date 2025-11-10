@@ -5,6 +5,7 @@ import com.hospitalsaude.scheduling.dto.DoctorResponseDTO;
 import com.hospitalsaude.scheduling.service.interfaces.IDoctorService;
 import com.hospitalsaude.scheduling.util.DayWeek;
 import com.hospitalsaude.scheduling.util.Specialty;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +24,8 @@ public class DoctorController {
     }
 
     @PostMapping
-    public ResponseEntity<DoctorResponseDTO> addNew(@RequestBody DoctorRequestDTO doctorDTO){
+    public ResponseEntity<DoctorResponseDTO> addNew(
+            @Valid @RequestBody DoctorRequestDTO doctorDTO){
         DoctorResponseDTO result = service.addNewDoctor(doctorDTO);
         return result != null ? ResponseEntity.status(201).body(result) : ResponseEntity.badRequest().build();
     }
@@ -60,7 +62,7 @@ public class DoctorController {
     @PutMapping("/{id}")
     public ResponseEntity<DoctorResponseDTO> alterDoctor(
             @PathVariable int id,
-            @RequestBody DoctorRequestDTO doctorDTO){
+            @Valid @RequestBody DoctorRequestDTO doctorDTO){
         DoctorResponseDTO result = service.modifyDoctor(id, doctorDTO);
         return result != null ? ResponseEntity.ok(result) : ResponseEntity.badRequest().build();
     }

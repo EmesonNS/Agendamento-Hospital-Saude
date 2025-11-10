@@ -4,6 +4,7 @@ import com.hospitalsaude.scheduling.dto.AppointmentRequestDTO;
 import com.hospitalsaude.scheduling.dto.AppointmentResponseDTO;
 import com.hospitalsaude.scheduling.dto.UpdateAppointmentStatusDTO;
 import com.hospitalsaude.scheduling.service.interfaces.IAppointmentService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +22,8 @@ public class AppointmentController {
     }
 
     @PostMapping
-    public ResponseEntity<AppointmentResponseDTO> addNew(@RequestBody AppointmentRequestDTO appointmentDTO){
+    public ResponseEntity<AppointmentResponseDTO> addNew(
+            @Valid @RequestBody AppointmentRequestDTO appointmentDTO){
         AppointmentResponseDTO result = appointmentService.addNewAppointment(appointmentDTO);
         return result != null ? ResponseEntity.status(201).body(result) : ResponseEntity.badRequest().build();
     }
@@ -66,7 +68,7 @@ public class AppointmentController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<AppointmentResponseDTO> alterAppointmentStatus(
             @PathVariable int id,
-            @RequestBody UpdateAppointmentStatusDTO statusDTO){
+            @Valid @RequestBody UpdateAppointmentStatusDTO statusDTO){
         AppointmentResponseDTO result = appointmentService.updateAppointmentStatus(id, statusDTO.status(), statusDTO.note());
         return result != null ? ResponseEntity.ok(result) : ResponseEntity.badRequest().build();
     }

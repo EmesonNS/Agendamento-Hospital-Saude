@@ -3,6 +3,7 @@ package com.hospitalsaude.scheduling.controller;
 import com.hospitalsaude.scheduling.dto.PatientRequestDTO;
 import com.hospitalsaude.scheduling.dto.PatientResponseDTO;
 import com.hospitalsaude.scheduling.service.interfaces.IPatientService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,8 @@ public class PatientController {
     }
 
     @PostMapping
-    public ResponseEntity<PatientResponseDTO> addNew(@RequestBody PatientRequestDTO patientDTO){
+    public ResponseEntity<PatientResponseDTO> addNew(
+            @Valid @RequestBody PatientRequestDTO patientDTO){
         PatientResponseDTO result = service.addNewPatient(patientDTO);
         return result != null ? ResponseEntity.status(201).body(result) : ResponseEntity.badRequest().build();
     }
@@ -50,7 +52,7 @@ public class PatientController {
     @PutMapping("/{id}")
     public ResponseEntity<PatientResponseDTO> alterPatient(
             @PathVariable int id,
-            @RequestBody PatientRequestDTO patientDTO){
+            @Valid @RequestBody PatientRequestDTO patientDTO){
         PatientResponseDTO result = service.modifyPatient(id, patientDTO);
         return result != null ? ResponseEntity.ok(result) : ResponseEntity.badRequest().build();
     }
