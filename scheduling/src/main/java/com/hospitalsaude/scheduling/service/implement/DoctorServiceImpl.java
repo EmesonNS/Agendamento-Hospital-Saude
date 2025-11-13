@@ -13,6 +13,7 @@ import com.hospitalsaude.scheduling.util.DayWeek;
 import com.hospitalsaude.scheduling.util.Specialty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.text.Normalizer;
@@ -26,23 +27,27 @@ import java.util.stream.Collectors;
 public class DoctorServiceImpl implements IDoctorService {
 
     private final DoctorRepository repository;
-
     private final ScheduleDoctorRepository scheduleDoctorRepository;
-
     private final AppointmentRepository appointmentRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private static final Logger logger = LoggerFactory.getLogger(DoctorServiceImpl.class);
 
-    public DoctorServiceImpl(DoctorRepository repository, ScheduleDoctorRepository scheduleDoctorRepository, AppointmentRepository appointmentRepository) {
+    public DoctorServiceImpl(DoctorRepository repository, ScheduleDoctorRepository scheduleDoctorRepository, AppointmentRepository appointmentRepository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.scheduleDoctorRepository = scheduleDoctorRepository;
         this.appointmentRepository = appointmentRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public DoctorResponseDTO addNewDoctor(DoctorRequestDTO doctorDTO) {
         try {
             Doctor doctorEntity = DoctorMapper.toEntity(doctorDTO);
+
+            String hashedPassword = passwordEncoder.encode(doctorDTO.password());
+            doctorEntity.setPassword(hashedPassword);
+
             Doctor savedEntity = repository.save(doctorEntity);
             return DoctorMapper.toResponseDTO(savedEntity);
         } catch (IllegalArgumentException e) {
@@ -62,7 +67,10 @@ public class DoctorServiceImpl implements IDoctorService {
 
             existingDoctor.setName(doctorDTO.name());
             existingDoctor.setEmail(doctorDTO.email());
-            existingDoctor.setPassword(doctorDTO.password());
+
+            String hashedPassword = passwordEncoder.encode(doctorDTO.password());
+            existingDoctor.setPassword(hashedPassword);
+
             existingDoctor.setCpf(doctorDTO.cpf());
             existingDoctor.setPhone(doctorDTO.phone());
             existingDoctor.setCrm(doctorDTO.crm());

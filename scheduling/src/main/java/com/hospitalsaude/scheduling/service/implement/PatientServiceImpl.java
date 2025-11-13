@@ -8,6 +8,7 @@ import com.hospitalsaude.scheduling.repository.PatientRepository;
 import com.hospitalsaude.scheduling.service.interfaces.IPatientService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,17 +18,23 @@ import java.util.stream.Collectors;
 public class PatientServiceImpl implements IPatientService {
 
     private final PatientRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
     private static final Logger logger = LoggerFactory.getLogger(PatientServiceImpl.class);
 
-    public PatientServiceImpl(PatientRepository repository) {
+    public PatientServiceImpl(PatientRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public PatientResponseDTO addNewPatient(PatientRequestDTO patientDTO) {
         try {
             Patient patientEntity = PatientMapper.toEntity(patientDTO);
+
+            String hashedPassword = passwordEncoder.encode(patientDTO.password());
+            patientEntity.setPassword(hashedPassword);
+
             Patient savedPatient = repository.save(patientEntity);
             return PatientMapper.toResponseDTO(savedPatient);
         } catch (IllegalArgumentException e) {
@@ -47,7 +54,10 @@ public class PatientServiceImpl implements IPatientService {
 
             existingPatient.setName(patientDTO.name());
             existingPatient.setEmail(patientDTO.email());
-            existingPatient.setPassword(patientDTO.password()); // (Ainda em texto plano, cuidaremos disso no passo de segurança)
+
+            String hashedPassword = passwordEncoder.encode(patientDTO.password());
+            existingPatient.setPassword(hashedPassword);
+
             existingPatient.setCpf(patientDTO.cpf());
             existingPatient.setPhone(patientDTO.phone());
             existingPatient.setDateBirth(patientDTO.dateBirth());
