@@ -9,8 +9,6 @@ services:
     environment:
       MYSQL_DATABASE: db_hospitalsaude
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
     ports:
       - "3306:3306"
     volumes:
