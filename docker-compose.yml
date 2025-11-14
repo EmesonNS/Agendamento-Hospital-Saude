@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # --- Serviço do Banco de Dados ---
+  mysql-db:
+    image: mysql:8.0
+    container_name: hospital_mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: db_hospitalsaude
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --- Serviço da API Spring Boot ---
+  hospital-api:
+    build: .
+    container_name: hospital_api
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/db_hospitalsaude?useTimeZone=true&serverTimeZone=America/Brasilia&allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+volumes:
+  mysql_data:
