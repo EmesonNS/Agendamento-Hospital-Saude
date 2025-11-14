@@ -4,6 +4,7 @@ import com.hospitalsaude.scheduling.dto.AppointmentRequestDTO;
 import com.hospitalsaude.scheduling.dto.AppointmentResponseDTO;
 import com.hospitalsaude.scheduling.dto.DoctorResponseDTO;
 import com.hospitalsaude.scheduling.dto.PatientResponseDTO;
+import com.hospitalsaude.scheduling.exception.ResourceNotFoundException;
 import com.hospitalsaude.scheduling.model.Appointment;
 import com.hospitalsaude.scheduling.model.Doctor;
 import com.hospitalsaude.scheduling.model.Patient;
@@ -23,12 +24,10 @@ public class AppointmentMapper {
     }
 
     public Appointment toEntity(AppointmentRequestDTO dto){
-        Doctor doctor = doctorRepository.findById(dto.doctorId()).orElse(null);
-        Patient patient = patientRepository.findById(dto.patientId()).orElse(null);
-
-        if (doctor == null || patient == null){
-            return null;
-        }
+        Doctor doctor = doctorRepository.findById(dto.doctorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Médico com ID " + dto.doctorId() + " não encontrado."));
+        Patient patient = patientRepository.findById(dto.patientId())
+                .orElseThrow(() -> new ResourceNotFoundException("Paciente com ID " + dto.patientId() + " não encontrado."));
 
         Appointment entity = new Appointment();
         entity.setDoctor(doctor);

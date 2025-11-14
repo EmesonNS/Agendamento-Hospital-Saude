@@ -2,6 +2,7 @@ package com.hospitalsaude.scheduling.mapper;
 
 import com.hospitalsaude.scheduling.dto.ScheduleDoctorRequestDTO;
 import com.hospitalsaude.scheduling.dto.ScheduleDoctorResponseDTO;
+import com.hospitalsaude.scheduling.exception.ResourceNotFoundException;
 import com.hospitalsaude.scheduling.model.Doctor;
 import com.hospitalsaude.scheduling.model.ScheduleDoctor;
 import com.hospitalsaude.scheduling.repository.DoctorRepository;
@@ -18,11 +19,8 @@ public class ScheduleDoctorMapper {
     }
 
     public ScheduleDoctor toEntity(ScheduleDoctorRequestDTO dto){
-        Doctor doctor = doctorRepository.findById(dto.doctorId()).orElse(null);
-
-        if (doctor == null){
-            return null;
-        }
+        Doctor doctor = doctorRepository.findById(dto.doctorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Médico com ID " + dto.doctorId() + " não encontrado."));
 
         ScheduleDoctor entity = new ScheduleDoctor();
         entity.setDoctor(doctor);

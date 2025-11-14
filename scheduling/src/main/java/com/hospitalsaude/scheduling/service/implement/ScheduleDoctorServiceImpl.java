@@ -2,6 +2,7 @@ package com.hospitalsaude.scheduling.service.implement;
 
 import com.hospitalsaude.scheduling.dto.ScheduleDoctorRequestDTO;
 import com.hospitalsaude.scheduling.dto.ScheduleDoctorResponseDTO;
+import com.hospitalsaude.scheduling.exception.ResourceNotFoundException;
 import com.hospitalsaude.scheduling.mapper.ScheduleDoctorMapper;
 import com.hospitalsaude.scheduling.model.Doctor;
 import com.hospitalsaude.scheduling.model.ScheduleDoctor;
@@ -35,34 +36,24 @@ public class ScheduleDoctorServiceImpl implements IScheduleDoctorService {
     public ScheduleDoctorResponseDTO addNewSchedule(ScheduleDoctorRequestDTO scheduleDoctorDTO) {
         try {
             ScheduleDoctor newSchedule = scheduleDoctorMapper.toEntity(scheduleDoctorDTO);
-            if (newSchedule == null){
-                logger.warn("Tentativa de criar agenda para médico (ID: {}) inexistente.", scheduleDoctorDTO.doctorId());
-                return null;
-            }
 
             ScheduleDoctor savedSchedule = scheduleDoctorRepository.save(newSchedule);
             return scheduleDoctorMapper.toResponseDTO(savedSchedule);
         } catch (IllegalArgumentException e) {
             logger.error("Erro ao tentar salvar Schedule: ", e);
+            throw e;
         }
-        return null;
     }
 
     @Override
     public ScheduleDoctorResponseDTO modifySchedule(int id, ScheduleDoctorRequestDTO scheduleDoctorDTO) {
+        ScheduleDoctor existingSchedule = scheduleDoctorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Agenda com ID " + id + " não encontrada."));
+
+        Doctor doctor = doctorRepository.findById(scheduleDoctorDTO.doctorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Médico com ID " + scheduleDoctorDTO.doctorId() + " não encontrado."));
+
         try {
-            ScheduleDoctor existingSchedule = scheduleDoctorRepository.findById(id).orElse(null);
-            if (existingSchedule == null){
-                logger.warn("Agenda com id {} não encontrada para atualização.", id);
-                return null;
-            }
-
-            Doctor doctor = doctorRepository.findById(scheduleDoctorDTO.doctorId()).orElse(null);
-            if (doctor == null){
-                logger.warn("Médico (ID: {}) referenciado na atualização da agenda não existe.", scheduleDoctorDTO.doctorId());
-                return null;
-            }
-
             existingSchedule.setDoctor(doctor);
             existingSchedule.setDayWeek(scheduleDoctorDTO.dayWeek());
             existingSchedule.setStartTime(scheduleDoctorDTO.startTime());
@@ -72,8 +63,8 @@ public class ScheduleDoctorServiceImpl implements IScheduleDoctorService {
             return scheduleDoctorMapper.toResponseDTO(updateSchedule);
         } catch (Exception e) {
             logger.error("Erro ao tentar atualizar Schedule: ", e);
+            throw e;
         }
-        return null;
     }
 
     @Override
@@ -100,18 +91,20 @@ public class ScheduleDoctorServiceImpl implements IScheduleDoctorService {
 
     @Override
     public List<ScheduleDoctorResponseDTO> findByDoctor(int doctorId) {
-        Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
-        if (doctor != null){
-            return scheduleDoctorRepository.findByDoctor(doctor)
-                    .stream()
-                    .map(scheduleDoctorMapper::toResponseDTO)
-                    .collect(Collectors.toList());
-        }
-        return List.of();
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Médico com ID " + doctorId + " não encontrado."));
+
+        return scheduleDoctorRepository.findByDoctor(doctor)
+                .stream()
+                .map(scheduleDoctorMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public void deleteById(int id) {
+        if (!scheduleDoctorRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Agenda com ID " + id + " não encontrada para exclusão.");
+        }
         scheduleDoctorRepository.deleteById(id);
     }
 }

@@ -17,15 +17,15 @@ public class AppointmentController {
 
     private final IAppointmentService appointmentService;
 
-    public AppointmentController(IAppointmentService service) {
-        this.appointmentService = service;
+    public AppointmentController(IAppointmentService appointmentService) {
+        this.appointmentService = appointmentService;
     }
 
     @PostMapping
     public ResponseEntity<AppointmentResponseDTO> addNew(
             @Valid @RequestBody AppointmentRequestDTO appointmentDTO){
         AppointmentResponseDTO result = appointmentService.addNewAppointment(appointmentDTO);
-        return result != null ? ResponseEntity.status(201).body(result) : ResponseEntity.badRequest().build();
+        return ResponseEntity.status(201).body(result);
     }
 
     @GetMapping
@@ -36,7 +36,7 @@ public class AppointmentController {
     @GetMapping("/{id}")
     public ResponseEntity<AppointmentResponseDTO> findById(@PathVariable int id){
         AppointmentResponseDTO result = appointmentService.findById(id);
-        return result != null ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping(value = "/search", params = "date")
@@ -70,7 +70,7 @@ public class AppointmentController {
             @PathVariable int id,
             @Valid @RequestBody UpdateAppointmentStatusDTO statusDTO){
         AppointmentResponseDTO result = appointmentService.updateAppointmentStatus(id, statusDTO.status(), statusDTO.note());
-        return result != null ? ResponseEntity.ok(result) : ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(result);
     }
 
 }

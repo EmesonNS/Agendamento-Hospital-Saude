@@ -2,6 +2,7 @@ package com.hospitalsaude.scheduling.service.implement;
 
 import com.hospitalsaude.scheduling.dto.DoctorRequestDTO;
 import com.hospitalsaude.scheduling.dto.DoctorResponseDTO;
+import com.hospitalsaude.scheduling.exception.ResourceNotFoundException;
 import com.hospitalsaude.scheduling.mapper.DoctorMapper;
 import com.hospitalsaude.scheduling.model.Doctor;
 import com.hospitalsaude.scheduling.model.ScheduleDoctor;
@@ -52,19 +53,16 @@ public class DoctorServiceImpl implements IDoctorService {
             return DoctorMapper.toResponseDTO(savedEntity);
         } catch (IllegalArgumentException e) {
             logger.error("Erro ao tentar salvar Doctor: ", e);
+            throw e;
         }
-        return null;
     }
 
     @Override
     public DoctorResponseDTO modifyDoctor(int id, DoctorRequestDTO doctorDTO) {
-        try {
-            Doctor existingDoctor = repository.findById(id).orElse(null);
-            if (existingDoctor == null){
-                logger.warn("Médico com id " + id + " não encontrado para atualização.");
-                return null;
-            }
+        Doctor existingDoctor = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Médico com ID " + id + " não encontrado."));
 
+        try {
             existingDoctor.setName(doctorDTO.name());
             existingDoctor.setEmail(doctorDTO.email());
 
@@ -80,8 +78,8 @@ public class DoctorServiceImpl implements IDoctorService {
             return DoctorMapper.toResponseDTO(updateDoctor);
         } catch (Exception e) {
             logger.error("Erro ao tentar atualizar Doctor: ", e);
+            throw e;
         }
-        return null;
     }
 
     @Override
@@ -94,14 +92,18 @@ public class DoctorServiceImpl implements IDoctorService {
 
     @Override
     public DoctorResponseDTO findById(int id) {
-        Doctor doctor = repository.findById(id).orElse(null);
-        return (doctor != null) ? DoctorMapper.toResponseDTO(doctor) : null;
+        Doctor doctor = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Médico com ID " + id + " não encontrado."));
+        return DoctorMapper.toResponseDTO(doctor);
     }
 
     @Override
     public DoctorResponseDTO findByCrm(int crm) {
         Doctor doctor = repository.findByCrm(crm);
-        return (doctor != null) ? DoctorMapper.toResponseDTO(doctor) : null;
+        if (doctor == null){
+            throw new ResourceNotFoundException("Médico com CRM " + crm + " não encontrado.");
+        }
+        return DoctorMapper.toResponseDTO(doctor);
     }
 
     @Override
@@ -114,16 +116,16 @@ public class DoctorServiceImpl implements IDoctorService {
 
     @Override
     public void deleteById(int id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Médico com ID " + id + " não encontrado para exclusão.");
+        }
         repository.deleteById(id);
     }
 
     @Override
     public Map<DayWeek, List<String>> openingTimes(int doctorId) {
-        Doctor doctor = repository.findById(doctorId).orElse(null);
-        if (doctor == null){
-            logger.warn("Médico com id " + doctorId + " não encontrado para buscar horários.");
-            return new HashMap<>();
-        }
+        Doctor doctor = repository.findById(doctorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Médico com ID " + doctorId + " não encontrado."));
 
         List<ScheduleDoctor> scheduleDoctorList = scheduleDoctorRepository.findByDoctor(doctor);
         Map<DayWeek, List<String>> scheduleMap = new HashMap<>();
@@ -149,11 +151,8 @@ public class DoctorServiceImpl implements IDoctorService {
 
     @Override
     public List<String> findAvailableTimesByDate(int doctorId, LocalDate date) {
-        Doctor doctor = repository.findById(doctorId).orElse(null);
-        if (doctor == null) {
-            logger.warn("Médico com id " + doctorId + " não encontrado para buscar horários disponíveis.");
-            return List.of();
-        }
+        Doctor doctor = repository.findById(doctorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Médico com ID " + doctorId + " não encontrado."));
 
         String dayWeek = date.getDayOfWeek()
                 .getDisplayName(TextStyle.FULL, Locale.of("pt", "BR"));

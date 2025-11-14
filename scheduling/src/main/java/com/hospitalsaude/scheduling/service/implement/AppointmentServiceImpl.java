@@ -2,6 +2,7 @@ package com.hospitalsaude.scheduling.service.implement;
 
 import com.hospitalsaude.scheduling.dto.AppointmentRequestDTO;
 import com.hospitalsaude.scheduling.dto.AppointmentResponseDTO;
+import com.hospitalsaude.scheduling.exception.ResourceNotFoundException;
 import com.hospitalsaude.scheduling.mapper.AppointmentMapper;
 import com.hospitalsaude.scheduling.model.Appointment;
 import com.hospitalsaude.scheduling.model.Doctor;
@@ -14,6 +15,7 @@ import com.hospitalsaude.scheduling.service.interfaces.IDoctorService;
 import com.hospitalsaude.scheduling.util.StatusAppointment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -30,7 +32,6 @@ public class AppointmentServiceImpl implements IAppointmentService {
     private final PatientRepository patientRepository;
     private final IDoctorService doctorService;
     private final AppointmentMapper appointmentMapper;
-
 
     private static final Logger logger = LoggerFactory.getLogger(AppointmentServiceImpl.class);
 
@@ -52,10 +53,6 @@ public class AppointmentServiceImpl implements IAppointmentService {
 
         if (availableTimes.contains(time.toString())){
             Appointment newAppointment = appointmentMapper.toEntity(appointmentDTO);
-            if (newAppointment == null){
-                logger.warn("Tentativa de agendamento com médico (ID: {}) ou paciente (ID: {}) inexistente.", appointmentDTO.doctorId(), appointmentDTO.patientId());
-                return null;
-            }
 
             newAppointment.setStatus(StatusAppointment.AGENDADA);
             newAppointment.setDateAppointment(LocalDateTime.now());
@@ -65,7 +62,7 @@ public class AppointmentServiceImpl implements IAppointmentService {
         }
 
         logger.warn("Horário {} no dia {} não disponível para o médico ID {}.", time, date, doctorId);
-        return null;
+        throw new DataIntegrityViolationException("O horário solicitado não está disponível.");
     }
 
     @Override
@@ -78,8 +75,9 @@ public class AppointmentServiceImpl implements IAppointmentService {
 
     @Override
     public AppointmentResponseDTO findById(int id) {
-        Appointment appointment = appointmentRepository.findById(id).orElse(null);
-        return (appointment != null) ? appointmentMapper.toResponseDTO(appointment) : null;
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Agendamento com ID " + id + " não encontrado."));
+        return appointmentMapper.toResponseDTO(appointment);
     }
 
     @Override
@@ -92,50 +90,43 @@ public class AppointmentServiceImpl implements IAppointmentService {
 
     @Override
     public List<AppointmentResponseDTO> findByDoctor(int doctorId) {
-        Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
-        if (doctor != null){
-            return appointmentRepository.findByDoctor(doctor)
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Médico com ID " + doctorId + " não encontrado."));
+
+        return appointmentRepository.findByDoctor(doctor)
                     .stream()
                     .map(appointmentMapper::toResponseDTO)
                     .collect(Collectors.toList());
-        }
-
-        return List.of();
     }
 
     @Override
     public List<AppointmentResponseDTO> findByPatient(int patientId) {
-        Patient patient = patientRepository.findById(patientId).orElse(null);
-        if (patient != null){
-            return appointmentRepository.findByPatient(patient)
-                    .stream()
-                    .map(appointmentMapper::toResponseDTO)
-                    .collect(Collectors.toList());
-        }
-        return List.of();
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Paciente com ID " + patientId + " não encontrado."));
+
+        return appointmentRepository.findByPatient(patient)
+                .stream()
+                .map(appointmentMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<AppointmentResponseDTO> findByDoctorAndDate(int doctorId, LocalDate date) {
-        Doctor doctor = doctorRepository.findById(doctorId).orElse(null);
-        if (doctor != null){
-            return appointmentRepository.findByDoctorAndDate(doctor, date)
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Médico com ID " + doctorId + " não encontrado."));
+
+        return appointmentRepository.findByDoctorAndDate(doctor, date)
                     .stream()
                     .map(appointmentMapper::toResponseDTO)
                     .collect(Collectors.toList());
-        }
-        return List.of();
     }
 
     @Override
     public AppointmentResponseDTO updateAppointmentStatus(int id, StatusAppointment status, String note) {
-        try {
-            Appointment existingAppointment = appointmentRepository.findById(id).orElse(null);
-            if (existingAppointment == null){
-                logger.warn("Agendamento com id " + id + " não encontrado para atualização.");
-                return null;
-            }
+        Appointment existingAppointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Agendamento com ID " + id + " não encontrado."));
 
+        try {
             existingAppointment.setStatus(status);
             if (note != null && !note.isBlank()){
                 existingAppointment.setNote(note);
@@ -145,7 +136,7 @@ public class AppointmentServiceImpl implements IAppointmentService {
             return appointmentMapper.toResponseDTO(updatedAppointment);
         } catch (Exception e) {
             logger.error("Erro ao tentar atualizar o status do agendamento: " + e.getMessage());
+            throw e;
         }
-        return null;
     }
 }

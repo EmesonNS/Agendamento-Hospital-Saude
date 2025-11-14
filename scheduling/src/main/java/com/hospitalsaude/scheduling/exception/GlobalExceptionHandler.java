@@ -57,4 +57,13 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponseDTO> handleResourceNotFoundException(ResourceNotFoundException exception){
+        Map<String, String> error = new HashMap<>();
+        error.put("recurso", exception.getMessage());
+
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO("Recurso não encontrado", error);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
 }

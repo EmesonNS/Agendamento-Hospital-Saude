@@ -27,7 +27,7 @@ public class DoctorController {
     public ResponseEntity<DoctorResponseDTO> addNew(
             @Valid @RequestBody DoctorRequestDTO doctorDTO){
         DoctorResponseDTO result = service.addNewDoctor(doctorDTO);
-        return result != null ? ResponseEntity.status(201).body(result) : ResponseEntity.badRequest().build();
+        return ResponseEntity.status(201).body(result);
     }
 
     @GetMapping
@@ -38,13 +38,13 @@ public class DoctorController {
     @GetMapping(value = "/search", params = "id")
     public ResponseEntity<DoctorResponseDTO> findById(@RequestParam(name = "id") int id){
         DoctorResponseDTO result = service.findById(id);
-        return result != null ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping(value = "/search", params = "crm")
     public ResponseEntity<DoctorResponseDTO> findByCrm(@RequestParam(name = "crm") int crm){
         DoctorResponseDTO result = service.findByCrm(crm);
-        return result != null ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping(value = "/search", params = "specialty")
@@ -64,16 +64,13 @@ public class DoctorController {
             @PathVariable int id,
             @Valid @RequestBody DoctorRequestDTO doctorDTO){
         DoctorResponseDTO result = service.modifyDoctor(id, doctorDTO);
-        return result != null ? ResponseEntity.ok(result) : ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable int id){
-        if (service.findById(id) != null){
-            service.deleteById(id);
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
+        service.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}/opening-times")

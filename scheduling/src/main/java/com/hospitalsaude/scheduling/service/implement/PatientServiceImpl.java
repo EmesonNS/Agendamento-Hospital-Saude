@@ -2,6 +2,7 @@ package com.hospitalsaude.scheduling.service.implement;
 
 import com.hospitalsaude.scheduling.dto.PatientRequestDTO;
 import com.hospitalsaude.scheduling.dto.PatientResponseDTO;
+import com.hospitalsaude.scheduling.exception.ResourceNotFoundException;
 import com.hospitalsaude.scheduling.mapper.PatientMapper;
 import com.hospitalsaude.scheduling.model.Patient;
 import com.hospitalsaude.scheduling.repository.PatientRepository;
@@ -39,19 +40,16 @@ public class PatientServiceImpl implements IPatientService {
             return PatientMapper.toResponseDTO(savedPatient);
         } catch (IllegalArgumentException e) {
             logger.error("Erro ao tentar salvar Patient: ", e);
+            throw e;
         }
-        return null;
     }
 
     @Override
     public PatientResponseDTO modifyPatient(int id, PatientRequestDTO patientDTO) {
-        try {
-            Patient existingPatient = repository.findById(id).orElse(null);
-            if (existingPatient == null){
-                logger.warn("Paciente com id " + id + "não encontrado para atualização.");
-                return null;
-            }
+        Patient existingPatient = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Paciente com ID " + id + " não encontrado."));
 
+        try {
             existingPatient.setName(patientDTO.name());
             existingPatient.setEmail(patientDTO.email());
 
@@ -69,8 +67,8 @@ public class PatientServiceImpl implements IPatientService {
             return PatientMapper.toResponseDTO(updatedEntity);
         }catch (IllegalArgumentException e){
             logger.error("Erro ao tentar atualizar Patient: ", e);
+            throw e;
         }
-        return null;
     }
 
     @Override
@@ -83,24 +81,34 @@ public class PatientServiceImpl implements IPatientService {
 
     @Override
     public PatientResponseDTO findById(int id) {
-        Patient patient = repository.findById(id).orElse(null);
-        return (patient != null) ? PatientMapper.toResponseDTO(patient) : null;
+        Patient patient = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Paciente com ID " + id + " não encontrado."));
+        return PatientMapper.toResponseDTO(patient);
     }
 
     @Override
     public PatientResponseDTO findByCpf(String cpf) {
         Patient patient = repository.findByCpf(cpf);
-        return (patient != null) ? PatientMapper.toResponseDTO(patient) : null;
+        if (patient == null){
+            throw new ResourceNotFoundException("Paciente com CPF " + cpf + " não encontrado.");
+        }
+        return PatientMapper.toResponseDTO(patient);
     }
 
     @Override
     public PatientResponseDTO findByEmail(String email) {
         Patient patient = repository.findByEmail(email);
-        return (patient != null) ? PatientMapper.toResponseDTO(patient) : null;
+        if (patient == null){
+            throw new ResourceNotFoundException("Paciente com Email " + email + " não encontrado.");
+        }
+        return PatientMapper.toResponseDTO(patient);
     }
 
     @Override
     public void deleteById(int id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Paciente com ID " + id + " não encontrado para exclusão.");
+        }
         repository.deleteById(id);
     }
 }

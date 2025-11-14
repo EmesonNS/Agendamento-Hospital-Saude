@@ -24,7 +24,7 @@ public class ScheduleDoctorController {
     public ResponseEntity<ScheduleDoctorResponseDTO> addNew(
             @Valid @RequestBody ScheduleDoctorRequestDTO scheduleDoctorDTO){
         ScheduleDoctorResponseDTO result = scheduleDoctorService.addNewSchedule(scheduleDoctorDTO);
-        return result != null ? ResponseEntity.status(201).body(result) : ResponseEntity.badRequest().build();
+        return ResponseEntity.status(201).body(result);
     }
 
     @GetMapping
@@ -49,16 +49,13 @@ public class ScheduleDoctorController {
             @PathVariable int id,
             @Valid @RequestBody ScheduleDoctorRequestDTO scheduleDoctorDTO){
         ScheduleDoctorResponseDTO result = scheduleDoctorService.modifySchedule(id, scheduleDoctorDTO);
-        return result != null ? ResponseEntity.ok(result) : ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable int id){
-        if (scheduleDoctorService.findById(id) != null){
-            scheduleDoctorService.deleteById(id);
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
+        scheduleDoctorService.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 
 }

@@ -23,7 +23,7 @@ public class PatientController {
     public ResponseEntity<PatientResponseDTO> addNew(
             @Valid @RequestBody PatientRequestDTO patientDTO){
         PatientResponseDTO result = service.addNewPatient(patientDTO);
-        return result != null ? ResponseEntity.status(201).body(result) : ResponseEntity.badRequest().build();
+        return ResponseEntity.status(201).body(result);
     }
 
     @GetMapping
@@ -34,7 +34,7 @@ public class PatientController {
     @GetMapping(value = "/search", params = "id")
     public ResponseEntity<PatientResponseDTO> findById(@RequestParam(name = "id") int id){
         PatientResponseDTO result = service.findById(id);
-        return result != null ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping(value = "/search", params = "cpf")
@@ -54,15 +54,12 @@ public class PatientController {
             @PathVariable int id,
             @Valid @RequestBody PatientRequestDTO patientDTO){
         PatientResponseDTO result = service.modifyPatient(id, patientDTO);
-        return result != null ? ResponseEntity.ok(result) : ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable int id){
-        if (service.findById(id) != null){
             service.deleteById(id);
             return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
     }
 }
