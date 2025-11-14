@@ -32,6 +32,13 @@ CREATE TABLE tbl_medico (
                             CONSTRAINT fk_medico_usuario FOREIGN KEY (id_usuario) REFERENCES tbl_usuario(id_usuario)
 );
 
+-- Tabela de Administradores
+-- Mapeada de: Admin.java (extends User)
+CREATE TABLE tbl_admin (
+                           id_usuario INT PRIMARY KEY, -- Esta é a PK e também a FK
+                           CONSTRAINT fk_admin_usuario FOREIGN KEY (id_usuario) REFERENCES tbl_usuario(id_usuario)
+);
+
 -- Tabela de Agendas dos Médicos
 -- Mapeada de: ScheduleDoctor.java
 CREATE TABLE tbl_agenda (
