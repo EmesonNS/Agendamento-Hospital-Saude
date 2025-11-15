@@ -7,6 +7,7 @@ import com.hospitalsaude.scheduling.mapper.PatientMapper;
 import com.hospitalsaude.scheduling.model.Patient;
 import com.hospitalsaude.scheduling.repository.PatientRepository;
 import com.hospitalsaude.scheduling.service.interfaces.IPatientService;
+import com.hospitalsaude.scheduling.util.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +36,7 @@ public class PatientServiceImpl implements IPatientService {
 
             String hashedPassword = passwordEncoder.encode(patientDTO.password());
             patientEntity.setPassword(hashedPassword);
+            patientEntity.setRole(Role.ROLE_PATIENT);
 
             Patient savedPatient = repository.save(patientEntity);
             return PatientMapper.toResponseDTO(savedPatient);

@@ -11,6 +11,7 @@ import com.hospitalsaude.scheduling.repository.DoctorRepository;
 import com.hospitalsaude.scheduling.repository.ScheduleDoctorRepository;
 import com.hospitalsaude.scheduling.service.interfaces.IDoctorService;
 import com.hospitalsaude.scheduling.util.DayWeek;
+import com.hospitalsaude.scheduling.util.Role;
 import com.hospitalsaude.scheduling.util.Specialty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,8 @@ public class DoctorServiceImpl implements IDoctorService {
 
             String hashedPassword = passwordEncoder.encode(doctorDTO.password());
             doctorEntity.setPassword(hashedPassword);
+
+            doctorEntity.setRole(Role.ROLE_DOCTOR);
 
             Doctor savedEntity = repository.save(doctorEntity);
             return DoctorMapper.toResponseDTO(savedEntity);

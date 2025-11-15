@@ -62,7 +62,7 @@ public class PatientController {
     @GetMapping(value = "/search", params = "cpf")
     public ResponseEntity<PatientResponseDTO> findByCpf(@RequestParam(name = "cpf") String cpf){
         PatientResponseDTO result = service.findByCpf(cpf);
-        return result != null ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
+        return ResponseEntity.ok(result);
     }
 
     @Operation(summary = "Buscar paciente por Email")
@@ -70,7 +70,7 @@ public class PatientController {
     @GetMapping(value = "/search", params = "email")
     public ResponseEntity<PatientResponseDTO> findByEmail(@RequestParam(name = "email") String email){
         PatientResponseDTO result = service.findByEmail(email);
-        return result != null ? ResponseEntity.ok(result) : ResponseEntity.notFound().build();
+        return ResponseEntity.ok(result);
     }
 
     @Operation(summary = "Atualizar dados do paciente", description = "Requer ROLE_ADMIN ou ROLE_DOCTOR.")
