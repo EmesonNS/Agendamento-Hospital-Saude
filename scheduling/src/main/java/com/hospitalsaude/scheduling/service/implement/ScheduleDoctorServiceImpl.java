@@ -103,7 +103,7 @@ public class ScheduleDoctorServiceImpl implements IScheduleDoctorService {
     @Override
     public void deleteById(int id) {
         if (!scheduleDoctorRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Agenda com ID " + id + " não encontrada para exclusão.");
+            throw new ResourceNotFoundException("Agenda", "com ID " + id + " não encontrada para exclusão");
         }
         scheduleDoctorRepository.deleteById(id);
     }

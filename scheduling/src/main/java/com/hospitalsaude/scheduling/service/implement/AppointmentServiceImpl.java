@@ -2,6 +2,7 @@ package com.hospitalsaude.scheduling.service.implement;
 
 import com.hospitalsaude.scheduling.dto.AppointmentRequestDTO;
 import com.hospitalsaude.scheduling.dto.AppointmentResponseDTO;
+import com.hospitalsaude.scheduling.exception.AppointmentConflictException;
 import com.hospitalsaude.scheduling.exception.ResourceNotFoundException;
 import com.hospitalsaude.scheduling.mapper.AppointmentMapper;
 import com.hospitalsaude.scheduling.model.Appointment;
@@ -15,7 +16,6 @@ import com.hospitalsaude.scheduling.service.interfaces.IDoctorService;
 import com.hospitalsaude.scheduling.util.StatusAppointment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -62,7 +62,8 @@ public class AppointmentServiceImpl implements IAppointmentService {
         }
 
         logger.warn("Horário {} no dia {} não disponível para o médico ID {}.", time, date, doctorId);
-        throw new DataIntegrityViolationException("O horário solicitado não está disponível.");
+        throw new AppointmentConflictException("O horário solicitado não está disponível para agendamento.",
+                                               "Não foi possível agendar a consulta no horário selecionado. Verifique os horários disponíveis e tente novamente.");
     }
 
     @Override

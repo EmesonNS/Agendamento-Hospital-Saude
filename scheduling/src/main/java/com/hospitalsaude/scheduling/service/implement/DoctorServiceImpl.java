@@ -104,7 +104,7 @@ public class DoctorServiceImpl implements IDoctorService {
     public DoctorResponseDTO findByCrm(int crm) {
         Doctor doctor = repository.findByCrm(crm);
         if (doctor == null){
-            throw new ResourceNotFoundException("Médico com CRM " + crm + " não encontrado.");
+            throw new ResourceNotFoundException("Médico", "com CRM " + crm);
         }
         return DoctorMapper.toResponseDTO(doctor);
     }
@@ -120,7 +120,7 @@ public class DoctorServiceImpl implements IDoctorService {
     @Override
     public void deleteById(int id) {
         if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Médico com ID " + id + " não encontrado para exclusão.");
+            throw new ResourceNotFoundException("Médico", "com ID " + id + " não encontrado para exclusão");
         }
         repository.deleteById(id);
     }

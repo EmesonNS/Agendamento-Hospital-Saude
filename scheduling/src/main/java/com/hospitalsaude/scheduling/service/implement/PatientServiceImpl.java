@@ -92,7 +92,7 @@ public class PatientServiceImpl implements IPatientService {
     public PatientResponseDTO findByCpf(String cpf) {
         Patient patient = repository.findByCpf(cpf);
         if (patient == null){
-            throw new ResourceNotFoundException("Paciente com CPF " + cpf + " não encontrado.");
+            throw new ResourceNotFoundException("Paciente", "com CPF " + cpf);
         }
         return PatientMapper.toResponseDTO(patient);
     }
@@ -101,7 +101,7 @@ public class PatientServiceImpl implements IPatientService {
     public PatientResponseDTO findByEmail(String email) {
         Patient patient = repository.findByEmail(email);
         if (patient == null){
-            throw new ResourceNotFoundException("Paciente com Email " + email + " não encontrado.");
+            throw new ResourceNotFoundException("Paciente", "com Email " + email);
         }
         return PatientMapper.toResponseDTO(patient);
     }
@@ -109,7 +109,7 @@ public class PatientServiceImpl implements IPatientService {
     @Override
     public void deleteById(int id) {
         if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Paciente com ID " + id + " não encontrado para exclusão.");
+            throw new ResourceNotFoundException("Paciente", "com ID " + id + " não encontrado para exclusão");
         }
         repository.deleteById(id);
     }
