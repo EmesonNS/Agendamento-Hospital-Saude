@@ -71,6 +71,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/patient").permitAll()
                         .requestMatchers(HttpMethod.GET, "/doctor/specialty").permitAll()
                         .requestMatchers(HttpMethod.GET, "/doctor/*/available-times").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/doctor/search").permitAll()
                         .requestMatchers("/doctor/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/schedule/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/patient/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_DOCTOR")
