@@ -1,115 +1,114 @@
-# Agendamento-Hospital-Saúde
+# Agendamento Hospital Saúde (API Backend)
 
-## 🧭 Roteiro Git
+Este repositório contém o backend completo para um sistema de agendamento hospitalar, construído com Java, Spring Boot e Spring Security.
 
-### ✅ **1. Fluxo de Branches**
+O projeto fornece uma API RESTful segura para gerenciar pacientes, médicos, agendas e consultas, com autenticação baseada em JWT e controle de acesso por papéis (Roles).
 
-```
-main         ← código de produção
-│
-├── develop      ← código de integração (merge de funcionalidades)
-│   ├── feat/
-│   └── fix/
-│   └── ...
-```
+-----
 
-* `main`: código estável e pronto para deploy.
-* `develop`: branch base para merge de features.
-* `feat/*`: novas funcionalidades.
-* `fix/*`: correções de bugs.
+## ✨ Funcionalidades Principais
 
----
+  * **Autenticação JWT:** Sistema de login seguro (`/auth/login`) que retorna um JSON Web Token.
+  * **Controle de Acesso (Roles):** Acesso diferenciado para 3 perfis:
+      * `ROLE_PATIENT`: Pode se cadastrar, ver seus próprios dados e agendar consultas.
+      * `ROLE_DOCTOR`: Pode gerenciar o status das consultas e ver dados de pacientes.
+      * `ROLE_ADMIN`: Tem controle total sobre o cadastro de médicos e suas agendas.
+  * **Gerenciamento de Médicos:** Endpoints de CRUD para Doutores (restrito ao Admin).
+  * **Gerenciamento de Agendas:** Endpoints para definir os dias e horários de trabalho dos médicos (restrito ao Admin).
+  * **Sistema de Agendamento:** Lógica de negócio para verificar horários disponíveis e prevenir agendamentos duplicados (usando *constraints* de banco de dados).
+  * **Migrações de Banco:** O schema do banco é totalmente gerenciado pelo **Flyway**.
+  * **Documentação da API:** A API é 100% documentada com **Swagger (OpenAPI 3)**.
+  * **Contêinerização:** O projeto está pronto para ser executado com **Docker** e **Docker Compose**.
 
-### 🧪 **2. Processo de Trabalho**
+-----
 
-#### 🔄 1. Clonar o projeto:
+## 🛠️ Stack Tecnológica
 
-```bash
-git clone https://github.com/EmesonNS/Agendamento-Hospital-Saude
-```
+  * **Java 21**
+  * **Spring Boot 3**
+  * **Spring Security 6** (Autenticação JWT)
+  * **Spring Data JPA** (Hibernate)
+  * **MySQL** (Banco de Dados Relacional)
+  * **Flyway** (Gerenciamento de Migrações do DB)
+  * **Docker / Docker Compose**
+  * **Springdoc OpenAPI 3** (Swagger)
+  * **Maven**
 
-#### 🌱 2. Criar uma nova branch:
+-----
 
-```bash
-git checkout -b feat/
-```
+## 🚀 Como Executar
 
-#### ✍️ 3. Trabalhar no código
+Existem duas maneiras de subir a aplicação:
 
-#### 💾 4. Adicionar e commitar:
+### Opção 1: Docker (Recomendado)
 
-```bash
-git add .
-git commit -m "feat: implementar cadastro de paciente"
-```
+Esta é a forma mais simples e rápida. Você só precisa ter o Docker e o Docker Compose instalados.
 
-#### 🔄 5. Atualizar com a `develop` (para evitar conflitos):
+1.  **Construa e Suba os Containers:**
+    (Se você estiver no Linux, pode precisar do `sudo`)
+    ```bash
+    docker compose up --build
+    ```
+2.  **Pronto\!** A API estará rodando em `http://localhost:8080` e o banco de dados MySQL em `http://localhost:3306`.
 
-```bash
-git checkout develop
-git pull origin develop
-git checkout feat/cadastro-paciente
-git merge develop
-```
+### Opção 2: Localmente
 
-#### 🚀 6. Enviar branch ao repositório:
+1.  **Inicie um Banco MySQL:**
+    Certifique-se de ter um servidor MySQL rodando (localmente ou em um container) e crie um banco de dados vazio:
+    ```sql
+    CREATE DATABASE db_hospitalsaude;
+    ```
+2.  **Configure o `application.properties`:**
+    Abra `scheduling/src/main/resources/application.properties` e verifique se as credenciais do seu banco local estão corretas:
+    ```properties
+    spring.datasource.username=root
+    spring.datasource.password=root
+    spring.datasource.url=jdbc:mysql://localhost:3306/db_hospitalsaude?useTimeZone=true&serverTimeZone=America/Brasilia
+    ```
+3.  **Execute a Aplicação:**
+    Use o Maven para rodar o projeto. O Flyway será executado automaticamente na inicialização, criando todas as tabelas e inserindo o usuário admin.
+    ```bash
+    # Navegue até a pasta que contém o pom.xml principal
+    cd scheduling
 
-```bash
-git push origin feat/cadastro-paciente
-```
+    # Rode a aplicação
+    mvn spring-boot:run
+    ```
 
-#### 🔃 7. Abrir Pull Request para `develop`
+-----
 
-* Descrever claramente o que a feature faz.
-* Marcar os outros para revisar.
+## 📚 Documentação da API (Swagger)
 
-#### ✔️ 8. Após aprovação, mergeie na `develop`.
+Uma vez que a aplicação esteja rodando (com qualquer um dos métodos acima), a documentação completa e interativa da API estará disponível em:
 
-#### 🔁 9. Periodicamente: `develop → main` (deploy ou entrega)
+**`http://localhost:8080/swagger-ui/index.html`**
 
----
+### Como Usar o Swagger com Segurança:
 
-### 🛑 **4. Regras importantes**
+1.  Use o endpoint `POST /auth/login` no Swagger para obter um token.
+2.  Clique no botão "Authorize" no topo da página.
+3.  Cole o token (ex: `Bearer ey...`) para autenticar suas requisições.
 
-* Nunca codar diretamente em `main` ou `develop`.
-* Cada funcionalidade = 1 branch.
-* Sempre descrever bem os commits.
-* Fazer `pull` antes de `push`.
-* Revisar os pull request.
+-----
 
----
+## 🔑 Acesso e Endpoints Principais
 
-### 💬 **5. Exemplo de mensagens de commit**
+O sistema possui 3 perfis de usuário. O primeiro admin é criado automaticamente pela migração `V2` do Flyway.
 
-| Tipo           | Prefixo     | Exemplo                                  |
-| -------------- | ----------- | ---------------------------------------- |
-| Funcionalidade | `feat:`     | `feat: criar endpoint de consulta`       |
-| Correção       | `fix:`      | `fix: corrigir bug no login`             |
-| Estilo         | `style:`    | `style: padronizar indentação`           |
-| Refatoração    | `refactor:` | `refactor: isolar lógica de agendamento` |
-| Teste          | `test:`     | `test: adicionar teste de integração`    |
+#### 👤 Admin Padrão
 
----
+  * **Email:** `admin@hospital.com`
+  * **Senha:** `admin123`
 
-## 📈 Esquemas do porojeto
+#### 👮 Regras de Acesso da API
 
-### ** 📔 Esqueleto Basico**
-![image](https://github.com/user-attachments/assets/17bdc1d9-c310-46e5-b903-e7e9351c7fab)
-
----
-
-### ** 📑 Modelo ER**
-![Imagem do WhatsApp de 2025-06-03 à(s) 13 43 12_1d0f3874](https://github.com/user-attachments/assets/2eca0f44-53c3-4c3e-b018-4076f4d6df7d)
-
----
-
-### ** 📚 Fluxo de Views**
-
-| View Paciente                                                                                                                             | View Medico                                                                                                                                       | View Admin                                                                                |
-|------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-![Imagem do WhatsApp de 2025-06-03 à(s) 16 55 32_c949de28](https://github.com/user-attachments/assets/0810ac00-45a6-4f6e-ba65-89dce6fa7d08) | ![Imagem do WhatsApp de 2025-06-03 à(s) 17 20 41_deeaf78b](https://github.com/user-attachments/assets/30891816-7a9d-48bf-990a-06ef3928cdf5) | ![image](https://github.com/user-attachments/assets/fb1c5f8f-b127-4fce-aba8-51cdd34518cd) |
-
----
-
-
-
+| Rota(s) | Método(s) | Acesso | Descrição |
+| :--- | :--- | :--- | :--- |
+| `/auth/login` | `POST` | **Público** | Login de qualquer usuário. |
+| `/patient` | `POST` | **Público** | Registro de um novo paciente. |
+| `/doctor/specialty` | `GET` | **Público** | Lista todas as especialidades. |
+| `/doctor/{id}/available-times` | `GET` | **Público** | Busca horários livres de um médico. |
+| `/doctor/**` | `GET`, `POST`, `PUT`, `DELETE` | `ROLE_ADMIN` | Gerenciamento completo dos médicos. |
+| `/schedule/**` | `GET`, `POST`, `PUT`, `DELETE` | `ROLE_ADMIN` | Gerenciamento completo das agendas. |
+| `/patient/**` | `GET`, `PUT`, `DELETE` | `ROLE_ADMIN`, `ROLE_DOCTOR` | Doutores e Admins podem gerenciar pacientes. |
+| `/appointment/**` | `GET`, `POST`, `PATCH` | `ROLE_ADMIN`, `ROLE_DOCTOR`, `ROLE_PATIENT` | Todos os usuários logados podem interagir com agendamentos. |
